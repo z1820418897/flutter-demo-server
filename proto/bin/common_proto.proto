@@ -1,0 +1,255 @@
+syntax="proto2";
+package CommonProtocols;
+option java_package="com.gc.patrol_robot.protobuf";
+
+// enum UserRole
+// {
+//     USER_ROLE_NONE = 0; //解绑定
+//     USER_ROLE_ADMIN = 1; //管理员
+//     USER_ROLE_MEMBER = 2; //成员
+// }
+
+//巡检点的类型
+enum PointAction
+{
+    PA_NONE = 0;  //None
+    PA_NAVIGATE_LOCATE = 1; //导航定位点
+    PA_SNAPSHOT_DETECT = 2; //拍照上传检测
+	PA_CHARGE = 3; 			//回归充电点
+}
+
+message DT_COUNT_TASK_DATA
+{
+    // required uint32 task_type = 1; //1 loop 2 count, 3 导航任务
+    required uint64 task_start_time = 2;
+    required uint64 task_end_time = 3;
+    required uint32 count = 4;
+    required uint64 interval = 5; //间隔时间
+}
+
+message DT_LOOP_TASK_DATA
+{
+    // required uint32 task_type = 1; //1 loop 2 count
+    required uint64 task_start_time = 2; //指定任务开始时间
+    required uint64 task_end_time = 3; //任务结束时间
+    required uint64 task_interval = 4; //任务间隔时间
+    // required uint64 run_start_time = 5; //运行时的
+    required uint64 run_duration = 6; //一次运行的持续时间
+    required uint64 run_interval = 7; //一次运行中的时间间隔
+    
+}
+// message DT_NAVIGATE_TASK_DATA //导航任务
+// {
+// }
+
+message DT_TASK
+{
+    required uint32 task_id = 1;
+    required uint32 task_type = 2; //任务类型,1 loop 2 count, 3 导航任务
+    optional string task_name = 3; 
+    optional uint32 map_id = 4; //任务所在地图id
+    optional int64 dc_id = 5; //任务关联的机器人
+    optional DT_COUNT_TASK_DATA count_task_data = 6;
+    optional DT_LOOP_TASK_DATA loop_task_data = 7;
+    repeated uint32 patrol_pt = 8; //巡检点集合
+    optional uint32 state = 9[default=1]; //任务状态 //1 run //2 pause  4 cancel one time 5 cancel multi time
+}
+
+message DT_DEL_TASK
+{
+    required uint32 task_id = 1;
+    required uint64 dc_id = 2;
+}
+
+message DT_TASK_STATE
+{
+    required uint32 task_id = 1;
+    required uint64 dc_id = 2;
+    required uint32 state = 3; //1 run //2 pause  4 cancel one time 5 cancel multi time
+}
+
+message DT_TASK_NTF
+{
+    optional DT_TASK add_task = 1;
+    optional DT_DEL_TASK del_task = 2;
+    optional DT_TASK modify_task = 3;
+    optional DT_TASK_STATE task_state = 4;
+}
+
+message DT_DC_BRIEF_INFO //设备简要信息
+{
+    required uint64 dc_id = 1;
+    required string dc_name = 2;
+    required uint32 online_state = 3; //1 online, 0 offline
+    required uint32 dc_type = 4;
+    optional uint32 curr_map_id = 5; //当前所在的mapid
+    optional uint32 mode = 6; //1 自动模式，2手动控制模式 3 充电
+}
+
+//这个消息会在client或者设备登录或者注册成功后服务器主动下发
+message DT_HTTP_SERVER_INFO_NTF
+{
+    optional string http_url = 1; //http api的地址
+    optional string rpc_host = 2; //rpc 的地址
+}
+
+message DT_MAP_BRIEF
+{
+    optional string map_name = 1; //地图名不重复
+    optional float resolution = 2; //分辨率
+    optional float pos_x = 3; //原点位置
+    optional float pos_y = 4; //原点位置
+    optional float pos_z = 5; //原点位置
+    optional float negate = 6; 
+    optional float occupied_threshold = 7;
+    optional float free_threshold = 8;
+    optional uint32 map_id = 9; //服务器分配的id,增加地图时可以不用传
+    optional string file_md5 = 10; //
+}
+
+message DT_ALL_MAP_CHANGE_NTF
+{
+    optional DT_MAP_BRIEF new_map = 1; //新的地图
+    optional uint32 del_map_id = 2; //删除了某个地图
+    optional DT_MAP_BRIEF map_brief_change = 3; //如果有file_md5字段，则说明地图文件和虚拟墙有改变
+}
+message Vector3f
+{
+    required float x = 1;
+    required float y = 2;
+    required float z = 3;
+}
+
+message Vector2f
+{
+    required float x = 1;
+    required float y = 2;
+}
+
+message DT_CLOSURE_GEO
+{
+    repeated Vector2f pt = 1;
+}
+
+message DT_MAP_WALL_DATA
+{
+    repeated DT_CLOSURE_GEO geo = 1; //虚拟墙数据
+    repeated Vector2f nav_pt = 2; //导航数据
+}
+
+message PATROL_PT_TYPE
+{
+    required uint32 pt_type_id = 1; //类型id
+    optional string pt_type_name = 2; //类型名
+    optional PointAction pt_action = 3; //行为
+}
+//关于巡检点类型的一些通知
+message DT_PATROL_PT_TYPE_NTF
+{
+    optional PATROL_PT_TYPE new_type = 1; //先添加巡检点类型
+    optional uint32 del_pt_type_id = 2; //删除的巡检点类型id
+    optional PATROL_PT_TYPE modified_type = 3; //修改了的巡检点类型
+}
+
+//巡检点数据结构
+message PATROL_PT
+{
+    required uint32 pt_id =1;
+    optional uint32 pt_type_id = 2;  //巡检点类型
+    optional Vector2f pt_pos = 3; //2d 平面位置
+    optional Vector3f pt_angle = 4; //分别是绕x,y,z轴的旋转角度
+    optional float  plat_height = 5; //云台高度 
+    optional float  stay_time = 6; //停留时间
+    optional Vector3f plat_angle = 7; //云台的旋转角度,分别是绕x,y,z轴的旋转角度
+    optional uint32 map_id = 8;
+    optional float plat_focus = 9; //云台camera 焦距
+}
+
+message DT_MAP_PATROL_PT_LIST
+{
+    required uint32 map_id = 1;
+    repeated PATROL_PT pt = 2; // map下的所有的巡检点
+}
+
+message DT_PATROL_PT_NTF
+{
+    optional PATROL_PT new_pt = 1; //先添加巡检点类型
+    optional uint32 del_pt = 2; //删除的巡检点类型id
+    optional PATROL_PT modified_pt = 3; //修改了的巡检点
+}
+//设备控制模式通知
+message DT_DC_CONTROL_MODE_NTF
+{
+    required uint64 dc_id = 1;
+    required uint32 control_mode = 2; //1 自动 2 手动
+}
+
+message DT_DC_SCENE_MODE_NTF
+{
+    required uint64 dc_id = 1;
+    required uint32 scene_mode = 2; //1 室内 2 室外 
+}
+
+message DT_DC_STATUS_INFO
+{
+    required uint64 dc_id = 1;
+    optional Vector3f pos = 2;
+    optional Vector3f bottom_angle = 3;
+    optional float power = 4;
+    optional float temp = 5;
+    optional float humidity = 6; //湿度
+    optional Vector3f plat_angle = 7; //云台的旋转角度
+    optional float lift_height = 8; //升降台高度
+    optional float camera_focus = 9; //摄像机焦距
+    optional float speed = 10; //运行速度
+    optional uint32 control_mode = 11; //控制模式，1 自动 2手动 3 充电
+    optional uint32 cur_map_id = 12; //当前工作地图
+    optional uint32 scene_mode = 13; //场景模式 1 室内 2室外
+    optional float  task_progress = 14; //任务进度， 负数表示没有进度
+    optional uint64 task_id = 15; //当前任务id, 0表示当前没有开始任务
+    optional int32  warn_code = 16; //0 正常， 1 定位失败  2 充电对接失败  3 导航异常 4 低电量
+
+}
+
+message DC_MOVE_OP
+{
+    required float val = 1[default=0];// 先不用
+    required uint32 dir = 2; // 位 1 forward 2 back 4 left 8 right 
+}
+message DC_ROTATE_OP
+{
+    required Vector3f rot = 1; //旋转角度 
+}
+
+message DT_CTL_OP //设备控制操作
+{
+    required uint64 dc_id = 1;
+    optional DC_MOVE_OP bottom_move_op = 2; //底盘移动控制
+    optional DC_ROTATE_OP bottom_rot_op = 3; //底盘旋转角度
+    optional DC_ROTATE_OP plat_rot_op = 4; //云台旋转角度
+    optional float        plat_height = 5; //云台的高度
+    optional float        bottom_speed = 6; //底盘速度
+    optional Vector3f     move_to = 7; //移动到某个点
+    optional float        plat_focus = 8; //云台camera的焦距
+    // optional float        plat_max_height_set = 9; //设置云台最大的高度，一般很少用，主要是出厂第一的时候设置一下
+}
+
+message DT_MAP_CONSTRUCT_DATA //在构建地图的过程中，设备定时向client上报构建的pgm,客户端收到后要刷新显示
+{
+    required bytes pgm = 1; //gzip压缩后的,
+    optional uint64 controller_user_id = 2; //发起构建地图的client的id
+}
+
+message DT_MAP_CONSTRUCT_NTF
+{
+    required uint64 dc_id = 1; //执行构建地图的设备id
+    required uint64 controller_user_id = 2; //请求构建地图的client的id
+    required uint32 mode = 3; //1 开始构建 2构建完成
+    optional string map_name = 4; //构建的时候客户端可以给这个带构建的地图取个名
+}
+
+message DT_DC_CURR_MAP
+{
+    required uint64 dc_id = 1;
+    required uint32 map_id = 2;
+}

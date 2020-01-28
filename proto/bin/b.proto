@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+package protobuf;
+
+option java_package="com.gc.yidong.protobuf";
+option java_outer_classname="YDCmd";
+
+
+
+enum YiDongCmd{
+    BEAT = 1001;//心跳
+    REQ_SITES = 1002 ;//获取所有的位置点
+    RSP_SITES = 1003 ;//返回所有的位置点
+    REQ_SITE = 1004 ;// 发送要去的位置点
+    RSP_SITE = 1005 ;// 返回到达的位置点
+    RSP_OBSTACLE_STOP=1006 ;// 停障信息上传
+    RSP_DEVICE_INFO=1007 ;// 设备状态信息上传
+    REQ_DEVICE_LOCATE=1008;// 定位
+    RSP_DEVICE_LOCATE=1009 ;//定位结果
+
+    REQ_SITE_SUBMIT=1010;//接收到到达的命令后  反馈收到
+    RSP_SITE_SUBMIT=1011;//发送要去的点命令后 收到的反馈
+}

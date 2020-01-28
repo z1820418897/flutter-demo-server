@@ -1,0 +1,180 @@
+syntax="proto2";
+package ClientProtocols;
+option java_package="com.gc.patrol_robot.protobuf";
+option java_outer_classname="CliProtoId";
+
+enum  ClientProtoId
+{
+    // MSG_CLI_REGISTER_REQ  = 3000;  //玩家注册
+    // MSG_CLI_REGISTER_RSP = 3001;  
+
+    //用户相关协议
+    MSG_CLI_LOGIN_REQ  = 3000;  //登录
+    MSG_CLI_LOGIN_RSP = 3001;  //
+
+    MSG_CLI_CHANGE_USER_INFO_REQ = 3002;  //修改用户信息,用户名，密码等
+
+    MSG_CLI_CHANGE_USER_INFO_RSP = 3003;  //
+
+    MSG_CLI_ADD_USER_REQ = 3004;  //添加其它账号
+
+    MSG_CLI_ADD_USER_RSP = 3005;  //
+
+    MSG_CLI_DEL_USER_REQ = 3006;  //删除其它账号
+
+    MSG_CLI_DEL_USER_RSP = 3007;  //
+
+    MSG_CLI_ENTER_SERVER_REQ = 3008;  //进入服务器
+
+    MSG_CLI_ENTER_SERVER_RSP = 3009;  //
+
+    MSG_CLI_ASSIGN_RIGHT_REQ = 3010;  //管理员给用户赋权限
+
+    MSG_CLI_ASSIGN_RIGHT_RSP = 3011;  //管理员给用户赋权限
+
+
+    MSG_CLI_GET_DC_LIST_REQ = 3012;  // 获取当前用户拥有的设备列表
+
+    MSG_CLI_GET_DC_LIST_RSP = 3013;  //
+
+    MSG_CLI_HEART_BEAT_REQ = 3014;  //心跳
+
+
+    MSG_GET_DC_MEDIA_SERVER_ADDR_REQ = 3015;  //获取设备所在多媒体server地址
+
+    MSG_GET_DC_MEDIA_SERVER_ADDR_RSP = 3016;  //
+
+
+    MSG_CLI_INFO_NTF = 3017;  //服务器主动下发的消息
+
+    MSG_CLI_GET_VISIBLE_USER_LIST_REQ = 3018;  //获取当前用户可见的用户列表
+
+    MSG_CLI_GET_VISIBLE_USER_LIST_RSP = 3019;  //
+
+
+    //获取http地址 
+    MSG_CLI_GET_HTTP_ADDR_REQ = 3020;  // 
+
+    MSG_CLI_GET_HTTP_ADDR_RSP = 3021;  // 
+
+    //--------------------巡检点类型相关协议------------------------------------
+    //巡检点类型操作
+    MSG_CLI_PATROL_PT_TYPE_OP_REQ = 3022;  //增删改//回复的消息就是通知消息 
+
+
+    MSG_CLI_PATROL_PT_TYPE_NTF = 3023;  //消息体同 CommonProtocols.DT_PATROL_PT_TYPE_NTF
+
+    //获取巡检点类型列表
+    MSG_CLI_GET_PATROL_PT_TYPE_LIST_REQ = 3024;  
+
+    MSG_CLI_GET_PATROL_PT_TYPE_LIST_RSP = 3025;  
+
+    //--------------------巡检点相关协议---------------------------------------
+    //巡检点增删改
+    MSG_CLI_PATROL_PT_OP_REQ = 3026; 
+
+    MSG_CLI_PATROL_PT_NTF = 3027;  //消息体同 CommonProtocols.DT_PATROL_PT_NTF
+
+    //后去巡检点列表
+    MSG_CLI_GET_PATROL_PT_LIST_REQ = 3028; 
+
+    MSG_CLI_GET_PATROL_PT_LIST_RSP = 3029; 
+
+    //-----------------------巡检任务相关协议---------------------
+    MSG_CLI_GET_TASK_LIST_REQ = 3030; 
+
+    MSG_CLI_GET_TASK_LIST_RSP = 3031; 
+
+    MSG_CLI_TASK_OP_REQ = 3032; 
+
+    MSG_CLI_TASK_NTF = 3033;  //消息体同 CommonProtocols.DT_TASK_NTF
+
+    //------自动模式还是手动控制模式
+    MSG_CLI_DEVICE_CONTROL_MODE_REQ = 3034;  //设备控制模式,应答会走通知
+
+    MSG_CLI_DC_CTL_OP_REQ = 3035;  //不需要回复，只需要发控制指令即可
+
+    
+    MSG_CLI_CONSTRUCT_MAP_REQ = 3036;  //请求构建地图开始或者结束的请求, CommonProtocols.DT_MAP_CONSTRUCT_NTF
+
+    MSG_CLI_SET_DC_CURR_MAP_REQ = 3037;  //设置设备当前的工作地图,消息同CommonProtocols.DT_DC_CURR_MAP 
+
+    //--- 场景模式 
+    MSG_CLI_SET_DC_SCENE_MODE_REQ = 3038;  //设备场景模式控制， 室内还是室外模式, 应答走消息通知
+
+    MSG_CLI_PT_RESULT_NTF = 3039;  //检测点结果通知
+
+
+    MSG_CLI_PROCESS_PATROL_RESULT_REQ = 3040;  //处理巡检结果
+
+    // MSG_CLI_PROCESS_PATROL_RESULT_RSP = 3041;  // 见通知
+
+    // MSG_CLI_PROCESS_PATROL_RESULT_REQ = 3042;  //处理巡检结果
+
+    
+
+    // MSG_CLI_BIND_DEVICE_REQ = 3043;  //绑定设备 或非绑定
+
+    // MSG_CLI_BIND_DEVICE_RSP = 3044;  //绑定设备
+
+    // MSG_CLI_TRIGGER_VIDEO_SESSION_REQ = 3045;  //发起或者挂断视频会话
+
+    // MSG_CLI_TRIGGER_VIDEO_SESSION_RSP = 3046; 
+
+    // MSG_CLI_DEVICE_OP_REQ = 3047;  //对设备的一些操作命令
+
+    // MSG_CLI_DEVICE_OP_RSP = 3048;  //对设备的一些操作命令
+
+    // MSG_CLI_TRIGGER_VIDEO_SESSION_NTF = 3049;  //服务器主动通知客户端链接视频播放
+
+    // MSG_CLI_GET_DEVICE_LIST_REQ = 3050;  //获取猫眼列表
+
+    // MSG_CLI_GET_DEVICE_LIST_RSP = 3051;  //获取猫眼列表
+
+    // // MSG_CLI_GET_DEVICE_BRIEF_REQ = 3052;  //获取猫眼简要信息
+
+    // // MSG_CLI_GET_DEVICE_BRIEF_RSP = 3053; 
+
+    // MSG_CLI_GET_DEVICE_DETAIL_REQ = 3054;  //获取猫眼详细信息
+
+    // MSG_CLI_GET_DEVICE_DETAIL_RSP = 3055; 
+
+    // MSG_CLI_GET_GROUP_MEMBER_LIST_REQ = 3056;  //获取以设备为组的成员列表
+
+    // MSG_CLI_GET_GROUP_MEMBER_LIST_RSP = 3057; 
+
+    // MSG_CLI_CHANGE_USER_INFO_REQ = 3058;  //用户修改个人信息
+
+    // MSG_CLI_CHANGE_USER_INFO_RSP = 3059; 
+
+    // // MSG_CLI_CHANGE_USER_INFO_NTF = 3060;  //通知其它人
+
+
+    // MSG_CLI_SETTING_CHANGE_REQ = 3061;  //更改设置
+
+    // MSG_CLI_SETTING_CHANGE_RSP = 3062;  //更改设置
+
+
+    // MSG_CLI_LOGOUT_REQ = 3063;   //客户端主动登出
+
+    // // MSG_CLI_ONLINE_CHANGE_NTF = 3064;  //设备上线下线通知
+
+    // MSG_STATE_CHANGE_NTF = 3065;  //状态改变通知
+
+
+    // MSG_CLI_SEND_AUDIO_REQ = 3066;   //发送音频请求
+
+    // MSG_CLI_SEND_AUDIO_RSP = 3067;   //有错误会返回，否则不会返回
+
+    // MSG_CLI_REV_NEW_AUDIO_NTF = 3068; //接受到了新的语音消息,消息体定义见Common下的DT_NEW_AUDIO_NTF
+
+    // MSG_CLI_CHANGE_DEV_ADMIN_USER_REQ = 3069;  //改变设备管理员
+
+    // MSG_CLI_CHANGE_DEV_ADMIN_USER_RSP = 3070;  //改变设备管理员,有错误会通过这个协议返回，否则通过PKG_STATE_CHANGE_NTF返回
+
+
+    // MSG_CLI_MODIFY_PASSWD_REQ = 3071;  //修改用户密码
+
+    // MSG_CLI_MODIFY_PASSWD_RSP = 3072; 
+
+}

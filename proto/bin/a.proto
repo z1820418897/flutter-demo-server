@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+package protobuf;
+
+option java_package="com.gc.yidong.protobuf";
+option java_outer_classname="YiDongProto";
+
+
+//获取所有点
+message SITES{
+    repeated uint32 sites = 1;
+}
+//发送点 返回到达的点
+message SITE{
+    required uint32 site = 1;
+}
+//机器人传递的信息
+message DT_DC_STATUS_INFO
+{
+    optional float power=1;
+    optional float temp=2;
+    optional float humidity=3  ; //湿度
+    optional float speed=4 ; //运行速度
+    optional uint64 error_code=6;  //异常编码
+    optional string error_state=7;  //异常状态描述
+}
+
+//从机器人获取位置信息是否成功
+message LOCATION_INFO
+{
+    required bool location=1;
+}

@@ -1,0 +1,645 @@
+syntax="proto2";
+package ClientProtocols;
+import "common_proto.proto";
+
+option java_package="com.gc.patrol_robot.protobuf";
+
+enum UserRole
+{
+    USER_ROLE_UNDEFINE = 0;
+    USER_ROLE_MEMBER = 1;
+    USER_ROLE_ADMIN = 2;
+    USER_ROLE_ROOT = 4;
+}
+
+
+message PKG_CLI_LOGIN_REQ //登录
+{
+    // required uint32 login_mode = 1; //1 用户名 2第三方
+    optional string user_name = 1;
+    required string pass_wd = 2;
+}
+
+message PKG_CLI_LOGIN_RSP //登录
+{
+    required int32 err_code = 1;
+    optional uint64 user_id = 2;
+}
+
+message PKG_CLI_CHANGE_USER_INFO_REQ //修改用户信息,用户名，密码等
+{
+    optional uint64 target_user_id = 1;//目标对象的id
+    optional string pass_wd = 2; //目标的新的密码
+    optional string nick_name = 3; //目标新的nickname
+    optional UserRole role = 4; //目标新的校色
+    optional string execute_pass_wd = 5; //执行者或者管理者的密码
+}
+
+message PKG_CLI_CHANGE_USER_INFO_RSP //
+{
+    required int32 err_code = 1;
+    optional uint64 target_user_id = 2;
+    optional string nick_name = 3;
+    optional UserRole role = 4;//目标新的校色
+}
+
+// message PKG_CLI_ENTER_SERVER_REQ //进入服务器
+// {
+// }
+
+message PKG_CLI_ENTER_SERVER_RSP //进入服务器
+{
+    required int32 err_code = 1;
+    optional string nick_name = 2;
+    optional UserRole role = 3; //目标角色
+    // optional uint32 icon = 3;
+    // optional string email = 4;
+    // optional string phone_nu = 5;
+}
+
+message DT_USER_ADD_INFO
+{
+    required string user_name = 1;
+    required string pass_wd = 2;
+    required string nick_name = 3;
+    required UserRole role = 4; 
+
+}
+
+message PKG_CLI_ADD_USER_REQ //添加其它账号
+{
+    // repeated DT_USER_ADD_INFO user_add_info = 1;
+    required string user_name = 1;
+    required string pass_wd = 2;
+    required string nick_name = 3;
+    required UserRole role = 4; 
+    repeated uint64 add_dc_list = 5; //设备添加列表
+    required string execute_pass_wd = 6;
+}
+message PKG_CLI_ADD_USER_RSP //
+{
+    required int32 err_code = 1; //0 success ， other error code
+    optional uint64 user_id = 2;
+    optional string user_name = 3;
+    optional string nick_name = 4;
+    repeated uint64 add_dc_list = 6; //设备添加列表
+    optional UserRole role = 7; 
+}
+
+message PKG_CLI_DEL_USER_REQ //删除其它账号
+{
+    required uint64 target_user_id = 1;
+    required string execute_pass_wd = 5;
+}
+
+message PKG_CLI_DEL_USER_RSP //
+{
+    required int32 err_code = 1;
+    optional uint64 target_user_id = 2;
+}
+
+message PKG_CLI_ASSIGN_RIGHT_REQ //管理员给用户赋权限
+{
+    required uint64 target_user_id = 1;
+    repeated uint64 add_dc_list = 2; //设备添加列表
+    repeated uint64 del_dc_list = 3; //设备删除列表
+    required string execute_pass_wd = 4;
+}
+
+message PKG_CLI_ASSIGN_RIGHT_RSP //管理员给用户赋权限
+{
+    required int32 err_code = 1;
+    optional uint64 target_user_id = 2;
+    repeated uint64 add_dc_list = 3; //设备添加列表
+    repeated uint64 del_dc_list = 4; //设备删除列表
+
+}
+
+message PKG_CLI_GET_DC_LIST_REQ // 获取当前用户拥有的设备列表
+{
+    required uint64 target_user_id = 1[default=0]; //所有查看的用户的id, 0表示自己，
+}
+
+message PKG_CLI_GET_DC_LIST_RSP //
+{
+    required int32 err_code = 1;
+    repeated CommonProtocols.DT_DC_BRIEF_INFO dc_info = 2; //设备简要信息列表
+    optional uint64 target_user_id = 3;
+}
+
+message PKG_GET_DC_MEDIA_SERVER_ADDR_REQ //获取设备所在多媒体server地址
+{
+    required uint64 dev_id = 1;
+}
+
+message PKG_GET_DC_MEDIA_SERVER_ADDR_RSP //
+{
+    required int32 err_code = 1;
+    optional uint64 dev_id = 2;
+    optional string media_addr = 3;
+}
+//被删除账号
+message DT_CLI_BE_REMOVED_NTF
+{
+    required uint64 executer_id = 1; //删除你的人的user_id
+}
+//设备下线通知
+message DT_DC_ON_OFF_LINE_NTF
+{
+    required uint64 dev_id = 1;
+    required uint32 state = 2; //1 online 0 offline
+}
+
+//当管理员修改了用户的信息会通知
+message DT_USER_INFO_CHANGE_NTF
+{
+    optional bool pass_wd_changed = 1; //1 密码被修改了
+    optional string new_nick_name = 2; //被修改后的nicknamne
+    optional UserRole new_role = 3; //被修改后的role
+}
+
+message PKG_CLI_INFO_NTF //服务器主动下发的消息
+{
+    optional DT_CLI_BE_REMOVED_NTF removed_ntf = 1; //被删账号
+    optional DT_DC_ON_OFF_LINE_NTF dc_on_off_line_ntf = 2; //设备上下线通知
+    optional DT_USER_INFO_CHANGE_NTF user_change_ntf = 3; //用户信息被修改后的通知
+    optional CommonProtocols.DT_HTTP_SERVER_INFO_NTF http_info = 4;
+    optional CommonProtocols.DT_DC_CONTROL_MODE_NTF dc_ctl_mode = 5; //设备控制模式
+    optional CommonProtocols.DT_DC_STATUS_INFO dc_state_info = 6; //设备状态通知
+    optional CommonProtocols.DT_MAP_CONSTRUCT_DATA map_construct = 7; //地图构建过程中的数据，客户端需要实时刷新
+    optional string patrol_pt_result = 8; //巡检点执行后的结果比如指示灯断路器等的结果,json格式
+    optional CommonProtocols.DT_DC_CURR_MAP curr_map_ntf = 9;
+    optional string new_tobe_add_map_id = 10; //新的要添加的地图id
+    optional CommonProtocols.DT_DC_SCENE_MODE_NTF dc_scene_mode = 11; //设备场景模式, 
+    optional DT_PATROL_PROCESS_RESULT_INFO patrol_ret_process_ntf = 12; //巡检结果处理通知 
+    
+}
+
+// message PKG_CLI_GET_VISIBLE_USER_LIST_REQ //获取当前用户可见的用户列表
+// {
+// }
+
+
+message DT_USER_BRIEF_INFO
+{
+    required uint64 user_id = 1;
+    required string nick_name = 2;
+    required UserRole role = 3;
+    required string user_name = 4;
+}
+
+message PKG_CLI_GET_VISIBLE_USER_LIST_RSP //
+{
+    required int32 err_code = 1;
+    repeated DT_USER_BRIEF_INFO user_info = 2;
+}
+
+message PKG_CLI_GET_HTTP_ADDR_RSP // 
+{
+    required int32 err_code = 1;
+    optional string http_url = 2;
+    optional string rpc_host = 3;
+}
+
+message PKG_CLI_GET_PATROL_PT_TYPE_LIST_RSP
+{
+    required int32 err_code = 1;
+    repeated CommonProtocols.PATROL_PT_TYPE pt_type = 2;
+}
+
+message DT_ADD_PATROL_PT_TYPE
+{
+    required string pt_type_name = 1; //类型名
+    required CommonProtocols.PointAction pt_action = 2; //行为
+}
+
+message PKG_CLI_PATROL_PT_TYPE_OP_REQ //增删改
+{
+   optional DT_ADD_PATROL_PT_TYPE add_pt_type = 1;  //添加
+   optional uint32 del_pt_type_id = 2;  //删除
+   optional CommonProtocols.PATROL_PT_TYPE modify_pt_type = 3; //修改，其中pt_type_id是不能变的
+}
+
+//--------------------巡检点相关协议---------------------------------------
+//巡检点增删改
+message DT_ADD_PATROL_PT
+{
+    optional uint32 pt_type_id = 2;  //巡检点类型
+    optional CommonProtocols.Vector2f pt_pos = 3; //2d 平面位置
+    optional CommonProtocols.Vector3f pt_angle = 4; //分别是绕x,y,z轴的旋转角度
+    optional float  plat_height = 5; //云台高度 
+    optional float  stay_time = 6; //停留时间
+    optional CommonProtocols.Vector3f plat_angle = 7; //云台的旋转角度,分别是绕x,y,z轴的旋转角度
+    optional uint32 map_id = 8; //地图id
+    optional float plat_focus = 9; //云台焦距
+}
+message DT_DEL_PATROL_PT
+{
+    required uint32 map_id = 1; //地图id
+    required uint32 pt_id = 2; //巡逻点id
+}
+message PKG_CLI_PATROL_PT_OP_REQ
+{
+    optional DT_ADD_PATROL_PT add_pt = 1; //添加
+    optional DT_DEL_PATROL_PT del_pt = 2;//删除
+    optional CommonProtocols.PATROL_PT modify_pt = 3; //修改
+}
+
+message PKG_CLI_GET_PATROL_PT_LIST_REQ
+{
+    required uint32 map_id = 1; //如果为0 表示所有的地图
+}
+
+message PKG_CLI_GET_PATROL_PT_LIST_RSP
+{
+    required int32 err_code = 1;
+    repeated CommonProtocols.DT_MAP_PATROL_PT_LIST map_pt = 2;
+}
+
+    //-----------------------巡检任务相关协议---------------------
+message PKG_CLI_GET_TASK_LIST_REQ
+{
+    required uint64 dc_id = 1; //机器人id
+}
+
+message PKG_CLI_GET_TASK_LIST_RSP
+{
+    required uint32 err_code = 1;
+    repeated CommonProtocols.DT_TASK task = 2; //task集合
+}
+
+message DT_ADD_TASK
+{
+    required string task_name = 2; 
+    required uint32 map_id = 3; //任务所在地图id
+    required int64 dc_id = 4; //任务关联的机器人
+    required uint32 task_type = 5; //任务类型,1 loop 2 count, 3 导航任务
+    optional CommonProtocols.DT_COUNT_TASK_DATA count_task_data = 6;
+    optional CommonProtocols.DT_LOOP_TASK_DATA loop_task_data = 7;
+    repeated uint32 patrol_pt = 8; //巡检点集合
+}
+
+message PKG_CLI_TASK_OP_REQ
+{
+   optional DT_ADD_TASK add_task = 1; 
+   optional CommonProtocols.DT_DEL_TASK del_task = 2; 
+   optional CommonProtocols.DT_TASK modify_task = 3;
+   optional CommonProtocols.DT_TASK_STATE task_state = 4;
+}
+
+message PKG_CLI_DEVICE_CONTROL_MODE_REQ //设备控制模式
+{
+    required uint64 dc_id = 1;
+    required uint32 mode = 2; //1 自动 2手动 3 充电
+}
+
+//--- 场景模式 
+message PKG_CLI_SET_DC_SCENE_MODE_REQ //设备场景模式控制， 室内还是室外模式, 应答走消息通知
+{
+    required uint64 dc_id = 1;
+    required uint32 mode = 2; //1 室内 2 室外
+}
+
+message PKG_CLI_DC_CTL_OP_REQ //不需要回复，只需要发控制指令即可
+{
+   optional CommonProtocols.DT_CTL_OP ctl_op = 3;
+}
+
+message PKG_CLI_PT_RESULT_NTF //检测点结果通知
+{
+    required string result = 1;
+    optional uint64 evt_id = 2; //事件的id
+}
+
+message DT_PATROL_PROCESS_RESULT_INFO
+{
+    required uint64 evt_id = 1;
+    required int32 process_ret = 2; //处理的结果 0 未处理 1 已处理  2 确认待处理
+    optional string process_desc = 3; //处理的描述
+    optional uint64 processor = 4; //处理人
+    optional string processor_name = 5; //处理人名字
+    optional uint64 process_time = 6; //处理的时间 
+}
+
+message PKG_CLI_PROCESS_PATROL_RESULT_REQ //处理巡检结果
+{
+    required DT_PATROL_PROCESS_RESULT_INFO process_info = 1;
+    required uint64 dev_id = 2;//是哪台机器上报的时间
+}
+
+// message PKG_CLI_PROCESS_PATROL_RESULT_RSP //
+// {
+
+// }
+// message PKG_CLI_DEVICE_CONTROL_MODE_RSP //设备控制模式
+// {
+//     required int32 err_code = 1;
+//     optional uint64 dc_id = 2;
+// }
+
+// message PKG_CLI_TASK_NTF //消息体同 CommonProtocols.DT_TASK_NTF
+// {
+
+// }
+
+
+
+// message PKG_CLI_PATROL_PT_OP_RSP
+// {
+
+// }
+
+// message PKG_CLI_ADD_MAP_REQ //先用tcp实现一个简单的
+// {
+//     required CommonProtocols.DT_MAP_BRIEF map_breif = 1;
+//     required bytes img_data = 2; //图片的二进制数据
+// }
+
+// message PKG_CLI_ADD_MAP_RSP //先用tcp实现一个简单的
+// {
+//     required int32 err_code = 1;
+//     optional CommonProtocols.DT_MAP_BRIEF map_breif = 2;
+// }
+
+// // message PKG_CLI_GET_MAP_LIST_REQ //获取地图列表
+// // {
+
+// // }
+
+// message PKG_CLI_GET_MAP_LIST_RSP
+// {
+//     required int32 err_code = 1;
+//     repeated CommonProtocols.DT_MAP_BRIEF map_info = 2;
+// }
+
+//     //下载一个地图也先走tcp，后面改成http
+// message PKG_CLI_GET_MAP_DATA_REQ
+// {
+//     required uint32 map_id = 1;
+// }
+// message PKG_CLI_GET_MAP_DATA_RSP
+// {
+//     required int32 err_code = 1;
+//     optional uint32 map_id = 2;
+//     optional bytes map_data = 3;
+// }
+
+
+
+// message PKG_CLI_BIND_DEVICE_REQ //绑定设备 或非绑定
+// {
+//     required uint64 dev_id = 1;
+//     required uint32 dev_type = 2;
+//     required uint32 mode = 3; //1 绑定，2 解绑定, 4 解绑定 踢出只有管理员才有权限, 1,2都是用户主动行为，3是管理员行为
+//     required uint32 apply_user = 4; //申请者(发起者)
+//     required uint64 target_user_id = 5;//人员的id
+// }
+
+// message PKG_CLI_BIND_DEVICE_RSP //绑定设备
+// {
+//     required int32 err_code = 1;
+//     optional uint64 dev_id = 2;
+//     optional uint32 mode = 3; //1 绑定，2 解绑定, 3 解绑定 踢出只有管理员才有权限, 1,2都是用户主动行为，3是管理员行为
+//     optional uint32 apply_user = 4; //申请者(发起者)
+//     optional uint64 target_user_id = 5;//人员的id
+//     optional uint32 dev_type = 6;
+//     optional uint32 role = 7;
+// }
+
+// // message DT_DEVICE_BRIEF_INFO
+// // {
+// //     required uint64 dev_id = 1;
+// //     required uint64 dev_type = 2;
+// //     optional float temp = 3;
+// //     optional float humidity = 4;
+// //     optional uint32 power_vol = 5; 
+// //     required string name = 6;
+// //     required uint32 online_state = 7; //1 在线 0 离线
+// // }
+
+// message DT_MEMBER_BRIEF_INFO
+// {
+//     required uint64 user_id = 1;
+//     optional string nick_name = 2;
+//     optional CommonProtocols.UserRole role = 3;
+//     optional uint32 icon = 4;
+// }
+
+// message PKG_CLI_GET_DEVICE_LIST_REQ //获取猫眼列表
+// {
+// }
+
+// message PKG_CLI_GET_DEVICE_LIST_RSP //获取猫眼列表
+// {
+//     // repeated DT_DEVICE_BRIEF_INFO eyecat_info = 1;
+//     repeated uint64 dev_list = 1; //设备id列表
+// }
+
+// // message PKG_CLI_GET_DEVICE_BRIEF_REQ //获取猫眼简要信息
+// // {
+// //     required uint64 dev_id = 1;
+// // }
+
+// // message PKG_CLI_GET_DEVICE_BRIEF_RSP
+// // {
+// //     required int32 err_code = 1;
+// //     optional CommonProtocols.DT_DEVICE_BRIEF_INFO brief_info = 2;
+// // }
+
+// message PKG_CLI_GET_DEVICE_DETAIL_REQ
+// {
+//     required uint64 dev_id = 1;
+//     required uint64 user_id = 2;
+// }
+
+// message PKG_CLI_GET_DEVICE_DETAIL_RSP
+// {
+//     required int32 err_code = 1;
+//     optional uint64 dev_id = 2; 
+//     optional CommonProtocols.DT_BELL_SETTING  bell_setting = 3;//
+//     optional CommonProtocols.DT_HUMAN_DETECT human_detect_setting = 4;
+//     optional CommonProtocols.DT_DEVICE_BRIEF_INFO brief_info = 5;
+    
+// }
+// message PKG_CLI_GET_GROUP_MEMBER_LIST_REQ
+// {
+//     required uint64 dev_id = 1;
+//     // repeated DT_MEMBER_BRIEF_INFO member = 2; 
+// }
+
+// message PKG_CLI_GET_GROUP_MEMBER_LIST_RSP
+// {
+//     required int32 err_code = 1;
+//     required uint64 dev_id = 2;
+//     repeated DT_MEMBER_BRIEF_INFO member = 3; 
+// }
+
+// message PKG_CLI_CHANGE_USER_INFO_REQ //用户修改个人信息
+// {
+//     optional string nick_name = 1;
+//     optional uint32 icon = 2;
+//     optional string mail = 3;
+//     optional string phone_nu = 4;
+// }
+
+// message PKG_CLI_CHANGE_USER_INFO_RSP
+// {
+//     required int32 err_code = 1;
+//     optional string nick_name = 2;
+//     optional uint32 icon = 3;
+//     optional string mail = 4;
+//     optional string phone_nu = 5;
+// }
+
+// // message PKG_CLI_CHANGE_USER_INFO_NTF //通知其它人
+// // {
+// //     repeated DT_USER_CHANGE_INFO user_change_info = 1;
+// // }
+
+// message PKG_CLI_TRIGGER_VIDEO_SESSION_REQ //发起或者挂断视频会话
+// {
+//     required uint64 dev_id = 1;
+//     required uint32 type = 2; //1 发起 2 挂断
+// }
+
+// message PKG_CLI_TRIGGER_VIDEO_SESSION_RSP //视频会话, 发起或者挂断
+// {
+//     required int32 err_code = 1;
+//     optional uint64 dev_id = 2;
+//     optional int32 type = 3;
+//     optional string rtmp_addr = 4; //视频播放地址
+// }
+// // message PKG_CLI_TRIGGER_VIDEO_SESSION_RSP
+// // {
+
+// // }
+
+// message PKG_CLI_DEVICE_OP_REQ //对设备的一些操作命令
+// {
+//     required uint64 dev_id = 1;
+//     required uint32 op = 2; //1 重启 ,
+// }
+
+// message PKG_CLI_DEVICE_OP_RSP //对设备的一些操作命令
+// {
+//     required int32 err_code = 1;
+//     optional uint32 op = 2;
+// }
+
+// message PKG_CLI_TRIGGER_VIDEO_SESSION_NTF //服务器主动通知客户端链接视频播放
+// {
+//     optional uint64 dev_id = 1;
+//     optional string rtmp_addr = 2;
+//     optional uint32 type = 3; //1 链接  2 断开
+// }
+
+// message DT_ONLINE_STATE
+// {
+//     required uint32 type = 1; //1 user， 2 device
+//     required uint64 target_id = 2;
+//     required uint32 state = 3; //1 online 2 offlline
+// }
+
+// message DT_USER_INFO_CHANGE
+// {
+//     required uint64 user_id = 1;
+//     optional string nick_name = 2;
+//     optional uint32 icon = 3;
+
+// }
+
+// message DT_DC_ADMIN_CHNAGE
+// {
+//     required uint64 old_admin_user = 1; //之前管理员
+//     required uint64 curr_admin_user = 2; //当前管理员
+// }
+
+// message DT_DC_STATE_CHANGE
+// {
+//     required uint64 dev_id = 1;
+//     optional CommonProtocols.DT_BELL_SETTING  bell_setting = 2;//
+//     optional CommonProtocols.DT_HUMAN_DETECT human_detect_setting = 3;
+//     optional CommonProtocols.DT_DEV_RPT_INFO rpt_info = 4; //设备上报信息
+//     optional uint32 new_alert = 5; ////新的警告信息 1 照片 2录像
+//     optional uint32 reset = 6; // 1 重置,设备重置，所有跟设备相关的帐号自动跟设备解绑定
+//     optional DT_DC_ADMIN_CHNAGE admin_info = 7;//设备管理员更改 
+// }
+
+
+// //-------------------状态发生改变时的通知-------
+// message PKG_STATE_CHANGE_NTF //服务器发送给客户端的通知消息
+// {
+//     optional DT_ONLINE_STATE online_state = 1; //设备或者人上线或者下线
+//     optional CommonProtocols.DT_DEVICE_BIND_INFO bind_info = 2; //绑定设备的通知
+//     optional DT_DC_STATE_CHANGE dc_change = 3; //设备相关信息改变
+//     repeated DT_USER_INFO_CHANGE user_info = 5; //用户基本信息发生改变
+//     repeated CommonProtocols.DT_ROLE_CHANGE role_change = 6; //角色改变
+// }
+
+// message PKG_CLI_SETTING_CHANGE_REQ //更改设置
+// {
+//     required uint64 dev_id = 1;
+//     required uint64 user_id = 2;//请求者的用户id一起带上来
+//     optional CommonProtocols.DT_BELL_SETTING  bell_setting = 3;//
+//     optional CommonProtocols.DT_HUMAN_DETECT human_detect_setting = 4;
+// }
+
+// message PKG_CLI_SETTING_CHANGE_RSP //更改设置
+// {
+//     required int32 err_code = 1;
+//     optional uint64 dev_id = 2;
+//     optional CommonProtocols.DT_BELL_SETTING  bell_setting = 3;//
+//     optional CommonProtocols.DT_HUMAN_DETECT human_detect_setting = 4;
+// }
+
+// // message PKG_CLI_SET_CURR_DEVICE_REQ //设置当前操作的设备,切换设备的时候用
+// // {
+// //     required uint64 cur_dev_id = 1;
+// //     optional uint64 pre_dev_id = 2;
+// // }
+
+// // message PKG_CLI_SET_CURR_DEVICE_RSP //设置当前操作的设备
+// // {
+// //     required int32 err_code = 1;
+// //     optional uint64 cur_dev_id = 2;
+// // }
+
+// message PKG_CLI_SEND_AUDIO_REQ  //发送音频请求
+// {
+//     required uint64 target_dev = 1;
+//     required bytes audio_code = 2;
+// }
+
+// message PKG_CLI_SEND_AUDIO_RSP  //有错误会返回，否则不会返回
+// {
+//     required int32 err_code = 1;
+// }
+
+// message PKG_CLI_CHANGE_DEV_ADMIN_USER_REQ
+// {
+//     required uint64 dev_id = 1;
+//     required uint64 old_admin_id = 2;
+//     required uint64 new_admin_id = 3;
+// }
+
+// message PKG_CLI_CHANGE_DEV_ADMIN_USER_RSP //改变设备管理员,有错误会通过这个协议返回，否则通过PKG_STATE_CHANGE_NTF返回
+// {
+//     required int32 err_code = 1;
+//     optional uint64 dev_id = 2; 
+//     optional uint64 old_admin_id = 3;
+//     optional uint64 new_admin_id = 4;
+// }
+
+// message PKG_CLI_MODIFY_PASSWD_REQ //修改用户密码
+// {
+//     required uint64 user_id = 1;
+//     required string old_pass_wd = 2;
+//     required string new_pass_wd = 3;
+// }
+
+// message PKG_CLI_MODIFY_PASSWD_RSP
+// {
+//     required int32 err_code = 1;
+//     optional uint64 user_id = 2;
+//     optional string new_pass_wd = 3;
+// }
